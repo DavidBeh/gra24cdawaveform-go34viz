@@ -16,8 +16,8 @@ SC_MODULE(MODULE_A) {
     bool value;
     int counter;
     int stretch;
-    SC_CTOR(MODULE_A) {
-    }
+    // Nicht implemntiert da über MODULE_A geht
+    SC_CTOR(MODULE_A);
 
     MODULE_A(sc_module_name, int stretch) : value(false), stretch(stretch) {
         SC_CTHREAD(behavior, clk);
@@ -38,8 +38,28 @@ SC_MODULE(MODULE_A) {
 SC_MODULE(MODULE_B) {
     MODULE_A a1;
     MODULE_A a2;
-
+    sc_in<bool> clk;
     sc_out<bool> out;
+    sc_signal<bool> in1, in2;
+
+    SC_CTOR(MODULE_B) : a1("a1", 2), a2("a2", 4){
+        a1.out.bind(in1);
+        a2.out.bind(in2);
+        a1.clk.bind(clk);
+        a2.clk.bind(clk);
+
+        SC_THREAD(behavior)
+        sensitive << clk.pos();
+    }
+
+    void behavior() {
+        while(true) {
+            wait();
+            wait(SC_ZERO_TIME);
+            out.write(in1.read() && in2.read());
+        }
+    }
+
 
     // TODO: Implement module B.
 };
