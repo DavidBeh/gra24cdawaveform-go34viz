@@ -25,11 +25,12 @@ SC_MODULE(MODULE_A) {
 
     void behavior() {
         while (true) {
-            wait();
             if (counter++ % stretch == 0) {
-                value != value;
+                value = !value;
                 out.write(value);
             }
+            wait();
+
         }
     }
     // TODO: Implement module A.
@@ -48,15 +49,17 @@ SC_MODULE(MODULE_B) {
         a1.clk.bind(clk);
         a2.clk.bind(clk);
 
-        SC_THREAD(behavior)
-        sensitive << clk.pos();
+        SC_CTHREAD(behavior, clk)
     }
 
     void behavior() {
         while(true) {
-            wait();
-            wait(SC_ZERO_TIME);
+
+            // print in1 and in2
+            std::cout << "in1: " << in1.read() << " in2: " << in2.read() << std::endl;
             out.write(in1.read() && in2.read());
+            wait();
+
         }
     }
 
